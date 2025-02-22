@@ -33,6 +33,10 @@ with app.app_context():
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+@app.route('/')
+def home():
+    return redirect(url_for('register'))  # Redirect to the registration page
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -48,7 +52,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         flash('Registration successful! You can now log in.')
-        return redirect(url_for('login'))
+        return redirect(url_for('login'))  # Redirect to login after registration
     
     return render_template('register.html')
 
@@ -71,7 +75,7 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-@app.route('/')
+@app.route('/index')
 @login_required
 def index():
     return render_template('index.html')
@@ -124,3 +128,4 @@ def delete_version(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
