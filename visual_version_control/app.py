@@ -1,9 +1,13 @@
 from flask import Flask, render_template, jsonify, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_wtf.csrf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from datetime import datetime
 import traceback
 import logging
+import bcrypt
 
 logging.basicConfig(level=logging.ERROR)
 
@@ -15,10 +19,16 @@ db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
+# Initialize CSRF protection
+csrf = CSRFProtect(app)
+
+# Initialize rate limiter
+limiter = Limiter(app, key_func=get_remote_address)
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), nullable=False, unique=True)
-    password = db.Column(db.String(150), nullable=False)
+    password = db.Column(db.String(60), nullable=False)  # BCrypt hash is always 60 characters long
 
 class Version(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -35,34 +45,36 @@ def load_user(user_id):
 
 @app.route('/')
 def home():
-    return redirect(url_for('register'))  # Redirect to the registration page
+    return redirect(url_for('register'))
 
 @app.route('/register', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
 def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         
-        # Check if the username already exists
         if User.query.filter_by(username=username).first():
             flash('Username already exists. Please choose a different one.')
             return redirect(url_for('register'))
         
-        new_user = User(username=username, password=password)  # In a real app, hash the password
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        new_user = User(username=username, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
         flash('Registration successful! You can now log in.')
-        return redirect(url_for('login'))  # Redirect to login after registration
+        return redirect(url_for('login'))
     
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
 def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        user = User.query.filter_by(username=username, password=password).first()
-        if user:
+        user = User.query.filter_by(username=username).first()
+        if user and bcrypt.checkpw(password.encode('utf-8'), user.password):
             login_user(user)
             return redirect(url_for('index'))
         else:
@@ -82,6 +94,7 @@ def index():
 
 @app.route('/api/versions', methods=['GET', 'POST'])
 @login_required
+@limiter.limit("30 per minute")
 def manage_versions():
     try:
         if request.method == 'POST':
@@ -93,7 +106,7 @@ def manage_versions():
             return jsonify(new_version), 201
         
         page = request.args.get('page', 1, type=int)
-        per_page = 5  # Number of versions per page
+        per_page = 5
         search_term = request.args.get('search', '', type=str)
         
         query = Version.query
@@ -116,6 +129,7 @@ def manage_versions():
 
 @app.route('/api/versions/<int:id>', methods=['DELETE'])
 @login_required
+@limiter.limit("10 per minute")
 def delete_version(id):
     try:
         version_entry = Version.query.get_or_404(id)
@@ -128,4 +142,3 @@ def delete_version(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
-
