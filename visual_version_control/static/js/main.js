@@ -1,5 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
 
+    function getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    }
+
     const barSvg = d3.select("svg");
     const lineSvg = d3.select("#lineChart");
     const width = +barSvg.attr("width");
@@ -50,7 +54,10 @@ document.addEventListener('DOMContentLoaded', function() {
             .on("click", function(event, d) {
                 if (confirm(`Are you sure you want to delete version ${d.version}?`)) {
                     fetch(`/api/versions/${d.id}`, {
-                        method: 'DELETE'
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRFToken': getCsrfToken()
+                        }
                     })
                     .then(response => {
                         if (response.ok) {
@@ -63,7 +70,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
     }
-
 
     function drawLineChart(data) {
         lineSvg.selectAll("*").remove(); // Clear previous chart
@@ -103,13 +109,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function fetchVersions(searchTerm = '') {
         const url = `/api/versions?page=${currentPage}&search=${encodeURIComponent(searchTerm)}`;
-        fetch(url)
+        fetch(url, {
+            headers: {
+                'X-CSRFToken': getCsrfToken()
+            }
+        })
             .then(response => response.json())
             .then(data => {
                 drawBarChart(data.versions);
-
                 drawLineChart(data.versions);
-
                 updatePaginationControls(data);
             })
             .catch(error => console.error('Error fetching versions:', error));
@@ -139,17 +147,17 @@ document.addEventListener('DOMContentLoaded', function() {
         fetchVersions(searchTerm);
     });
 
-    // Form submission for adding new versions
     document.getElementById("versionForm").addEventListener("submit", function(event) {
         event.preventDefault();
         const version = document.getElementById("version").value;
         const date = document.getElementById("date").value;
         const changes = document.getElementById("changes").value;
 
-
-        // Check if version already exists
-
-        fetch('/api/versions')
+        fetch('/api/versions', {
+            headers: {
+                'X-CSRFToken': getCsrfToken()
+            }
+        })
             .then(response => response.json())
             .then(data => {
                 const exists = data.versions.some(v => v.version === version);
@@ -159,17 +167,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 const newVersion = { version, date, changes };
 
-                console.log("New version data:", newVersion); // Log the data being sent
+                console.log("New version data:", newVersion);
                 fetch('/api/versions', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json; charset=utf-8'
-
+                        'Content-Type': 'application/json; charset=utf-8',
+                        'X-CSRFToken': getCsrfToken()
                     },
                     body: JSON.stringify(newVersion)
                 })
                 .then(response => {
-
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
@@ -185,7 +192,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
                 .catch(error => {
                     console.error('Error adding version:', error);
-
                     alert("Error adding version: " + error.message);
                 });
             });
