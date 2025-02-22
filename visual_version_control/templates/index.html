@@ -37,9 +37,16 @@
             <h2>Add New Version</h2>
             <form id="versionForm" class="mb-4">
                 <div class="input-group">
+
+                    <label for="version" class="sr-only">Version</label>
                     <input type="text" class="form-control" id="version" placeholder="Version" required>
+                    
+                    <label for="date" class="sr-only">Date</label>
                     <input type="date" class="form-control" id="date" required>
+                    
+                    <label for="changes" class="sr-only">Changes</label>
                     <input type="text" class="form-control" id="changes" placeholder="Changes" required>
+                    
                     <div class="input-group-append">
                         <button type="submit" class="btn btn-primary">Add Version</button>
                     </div>
