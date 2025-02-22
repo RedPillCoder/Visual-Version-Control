@@ -1,8 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
+
     const barSvg = d3.select("svg");
     const lineSvg = d3.select("#lineChart");
     const width = +barSvg.attr("width");
     const height = +barSvg.attr("height");
+
     let currentPage = 1;
 
     function drawBarChart(data) {
@@ -62,6 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
+
     function drawLineChart(data) {
         lineSvg.selectAll("*").remove(); // Clear previous chart
 
@@ -97,13 +100,16 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr("d", line);
     }
 
+
     function fetchVersions(searchTerm = '') {
         const url = `/api/versions?page=${currentPage}&search=${encodeURIComponent(searchTerm)}`;
         fetch(url)
             .then(response => response.json())
             .then(data => {
                 drawBarChart(data.versions);
+
                 drawLineChart(data.versions);
+
                 updatePaginationControls(data);
             })
             .catch(error => console.error('Error fetching versions:', error));
@@ -140,6 +146,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const date = document.getElementById("date").value;
         const changes = document.getElementById("changes").value;
 
+
+        // Check if version already exists
+
         fetch('/api/versions')
             .then(response => response.json())
             .then(data => {
@@ -149,15 +158,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 const newVersion = { version, date, changes };
+
                 console.log("New version data:", newVersion); // Log the data being sent
                 fetch('/api/versions', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json; charset=utf-8'
+
                     },
                     body: JSON.stringify(newVersion)
                 })
                 .then(response => {
+
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
@@ -173,6 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
                 .catch(error => {
                     console.error('Error adding version:', error);
+
                     alert("Error adding version: " + error.message);
                 });
             });

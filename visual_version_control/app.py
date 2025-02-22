@@ -1,12 +1,13 @@
 from flask import Flask, render_template, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-import traceback
-import logging
-
-logging.basicConfig(level=logging.ERROR)
+import traceback
+import logging
+
+logging.basicConfig(level=logging.ERROR)
 
 app = Flask(__name__)
+logging.basicConfig(level=logging.ERROR, format='%(asctime)s %(levelname)s %(message)s')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///versions.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -29,21 +30,27 @@ def manage_versions():
     try:
         if request.method == 'POST':
             new_version = request.json
+
             date = datetime.strptime(new_version['date'], '%Y-%m-%d').date()
             version_entry = Version(version=new_version['version'], date=date, changes=new_version['changes'])
+
             db.session.add(version_entry)
             db.session.commit()
             return jsonify(new_version), 201
         
         page = request.args.get('page', 1, type=int)
-        per_page = 5
+
+        per_page = 5  # Number of versions per page
+
         search_term = request.args.get('search', '', type=str)
         
         query = Version.query
         if search_term:
             query = query.filter(Version.version.ilike(f'%{search_term}%') | Version.changes.ilike(f'%{search_term}%'))
         
+
         versions = query.order_by(Version.date.desc()).paginate(page, per_page, error_out=False)
+
         return jsonify({
             "versions": [{"id": v.id, "version": v.version, "date": v.date.strftime('%Y-%m-%d'), "changes": v.changes} for v in versions.items],
             "has_next": versions.has_next,
@@ -53,8 +60,11 @@ def manage_versions():
         })
     
     except Exception as e:
-        logging.error(traceback.format_exc())
-        return jsonify({"error": "An internal error has occurred!"}), 500
+
+        logging.error(traceback.format_exc())
+
+        return jsonify({"error": "An internal error has occurred!"}), 500
+
 
 @app.route('/api/versions/<int:id>', methods=['DELETE'])
 def delete_version(id):
@@ -64,8 +74,11 @@ def delete_version(id):
         db.session.commit()
         return jsonify({"message": "Version deleted"}), 204
     except Exception as e:
-        logging.error(traceback.format_exc())
-        return jsonify({"error": "An internal error has occurred!"}), 500
+
+        logging.error(traceback.format_exc())
+
+        return jsonify({"error": "An internal error has occurred!"}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
