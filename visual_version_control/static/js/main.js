@@ -113,26 +113,30 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 const newVersion = { version, date, changes };
+                console.log("New version data:", newVersion); // Log the data being sent
                 fetch('/api/versions', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                    'Content-Type': 'application/json; charset=utf-8' // Fixed Content-Type header
                     },
                     body: JSON.stringify(newVersion)
                 })
                 .then(response => {
-                    if (response.ok) {
-                        alert("Version added successfully!");
-                        fetchVersions(); // Refresh the chart
-                        // Clear the form fields
-                        document.getElementById("version").value = '';
-                        document.getElementById("date").value = '';
-                        document.getElementById("changes").value = '';
-                    } else {
-                        throw new Error('Error adding version');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
+                    return response.json();
+                })
+                .then(data => {
+                    alert("Version added successfully!");
+                    fetchVersions(); // Refresh the chart
+                    // Clear the form fields
+                    document.getElementById("version").value = '';
+                    document.getElementById("date").value = '';
+                    document.getElementById("changes").value = '';
                 })
                 .catch(error => {
+                    console.error('Error adding version:', error);
                     alert("Error adding version: " + error.message);
                 });
             });
