@@ -5,48 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visual Version Control</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://d3js.org/d3.v6.min.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    <style>
-        body {
-            margin: 20px;
-        }
-        svg {
-            margin-top: 20px;
-            border: 1px solid #ccc;
-        }
-        #tooltip {
-            position: absolute;
-            text-align: center;
-            width: 120px;
-            padding: 5px;
-            font: 12px sans-serif;
-            background: lightsteelblue;
-            border: 0px;
-            border-radius: 8px;
-            pointer-events: none;
-            opacity: 0;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
         <h1 class="text-center">Visual Version Control System</h1>
+        <a href="/logout" class="btn btn-danger">Logout</a>
         
         <div class="form-group">
             <h2>Add New Version</h2>
             <form id="versionForm" class="mb-4">
                 <div class="input-group">
-
-                    <label for="version" class="sr-only">Version</label>
                     <input type="text" class="form-control" id="version" placeholder="Version" required>
-                    
-                    <label for="date" class="sr-only">Date</label>
                     <input type="date" class="form-control" id="date" required>
-                    
-                    <label for="changes" class="sr-only">Changes</label>
                     <input type="text" class="form-control" id="changes" placeholder="Changes" required>
-                    
                     <div class="input-group-append">
                         <button type="submit" class="btn btn-primary">Add Version</button>
                     </div>
@@ -75,3 +49,4 @@
     </div>
 </body>
 </html>
+
