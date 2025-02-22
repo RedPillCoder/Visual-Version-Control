@@ -73,6 +73,7 @@ def delete_version(id):
         db.session.delete(version_entry)
         db.session.commit()
         return jsonify({"message": "Version deleted"}), 204
+
     except Exception as:
 
         logging.error(traceback.format_exc())
