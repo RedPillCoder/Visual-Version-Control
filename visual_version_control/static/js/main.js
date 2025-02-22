@@ -1,11 +1,12 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const svg = d3.select("svg");
-    const width = +svg.attr("width");
-    const height = +svg.attr("height");
+    const barSvg = d3.select("svg");
+    const lineSvg = d3.select("#lineChart");
+    const width = +barSvg.attr("width");
+    const height = +barSvg.attr("height");
     let currentPage = 1;
 
     function drawBarChart(data) {
-        svg.selectAll("*").remove(); // Clear previous chart
+        barSvg.selectAll("*").remove(); // Clear previous chart
 
         const x = d3.scaleBand()
             .domain(data.map(d => d.version))
@@ -16,14 +17,14 @@ document.addEventListener('DOMContentLoaded', function() {
             .domain([0, data.length])
             .range([height, 0]);
 
-        svg.append("g")
+        barSvg.append("g")
             .attr("transform", "translate(0," + height + ")")
             .call(d3.axisBottom(x));
 
-        svg.append("g")
+        barSvg.append("g")
             .call(d3.axisLeft(y));
 
-        svg.selectAll(".bar")
+        barSvg.selectAll(".bar")
             .data(data)
             .enter().append("rect")
             .attr("class", "bar")
@@ -40,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     .style("left", (event.pageX + 5) + "px")
                     .style("top", (event.pageY - 28) + "px");
             })
-            .on("mouseout", function(d) {
+            .on("mouseout", function() {
                 d3.select(this).attr("fill", "steelblue");
                 d3.select("#tooltip").transition().duration(500).style("opacity", 0);
             })
@@ -61,12 +62,48 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
+    function drawLineChart(data) {
+        lineSvg.selectAll("*").remove(); // Clear previous chart
+
+        const margin = {top: 20, right: 20, bottom: 30, left: 50};
+        const width = +lineSvg.attr("width") - margin.left - margin.right;
+        const height = +lineSvg.attr("height") - margin.top - margin.bottom;
+
+        const x = d3.scaleTime().range([0, width]);
+        const y = d3.scaleLinear().range([height, 0]);
+
+        const line = d3.line()
+            .x(d => x(new Date(d.date)))
+            .y((d, i) => y(i));
+
+        const g = lineSvg.append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        x.domain(d3.extent(data, d => new Date(d.date)));
+        y.domain([0, data.length - 1]);
+
+        g.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x));
+
+        g.append("g")
+            .call(d3.axisLeft(y));
+
+        g.append("path")
+            .datum(data)
+            .attr("fill", "none")
+            .attr("stroke", "steelblue")
+            .attr("stroke-width", 1.5)
+            .attr("d", line);
+    }
+
     function fetchVersions(searchTerm = '') {
         const url = `/api/versions?page=${currentPage}&search=${encodeURIComponent(searchTerm)}`;
         fetch(url)
             .then(response => response.json())
             .then(data => {
                 drawBarChart(data.versions);
+                drawLineChart(data.versions);
                 updatePaginationControls(data);
             })
             .catch(error => console.error('Error fetching versions:', error));
@@ -103,7 +140,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const date = document.getElementById("date").value;
         const changes = document.getElementById("changes").value;
 
-        // Check if version already exists
         fetch('/api/versions')
             .then(response => response.json())
             .then(data => {
@@ -117,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 fetch('/api/versions', {
                     method: 'POST',
                     headers: {
-                    'Content-Type': 'application/json; charset=utf-8' // Fixed Content-Type header
+                        'Content-Type': 'application/json; charset=utf-8'
                     },
                     body: JSON.stringify(newVersion)
                 })
@@ -129,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
                 .then(data => {
                     alert("Version added successfully!");
-                    fetchVersions(); // Refresh the chart
+                    fetchVersions(); // Refresh the charts
                     // Clear the form fields
                     document.getElementById("version").value = '';
                     document.getElementById("date").value = '';
