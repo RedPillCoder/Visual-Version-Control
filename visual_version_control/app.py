@@ -33,7 +33,13 @@ def manage_versions():
         
         page = request.args.get('page', 1, type=int)
         per_page = 5  # Number of versions per page
-        versions = Version.query.paginate(page, per_page, error_out=False)
+        search_term = request.args.get('search', '', type=str)
+        
+        query = Version.query
+        if search_term:
+            query = query.filter(Version.version.ilike(f'%{search_term}%') | Version.changes.ilike(f'%{search_term}%'))
+        
+        versions = query.paginate(page, per_page, error_out=False)
         return jsonify({
             "versions": [{"id": v.id, "version": v.version, "date": v.date.strftime('%Y-%m-%d'), "changes": v.changes} for v in versions.items],
             "has_next": versions.has_next,
