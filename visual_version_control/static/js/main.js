@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const width = +svg.attr("width");
     const height = +svg.attr("height");
 
-    function drawChart(data) {
+    function drawBarChart(data) {
         svg.selectAll("*").remove(); // Clear previous chart
 
         const x = d3.scaleBand()
@@ -59,47 +59,37 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    function fetchVersions() {
-        fetch('/api/versions')
-            .then(response => response.json())
-            .then(data => drawChart(data))
-            .catch(error => console.error('Error fetching versions:', error));
+    function drawLineChart(data) {
+        const lineSvg = d3.select("#lineChart");
+        lineSvg.selectAll("*").remove(); // Clear previous chart
+
+        const x = d3.scaleTime()
+            .domain(d3.extent(data, d => new Date(d.date)))
+            .range([0, width]);
+
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(data, d => d.version)])
+            .range([height, 0]);
+
+        const line = d3.line()
+            .x(d => x(new Date(d.date)))
+            .y((d, i) => y(i + 1));
+
+        lineSvg.append("path")
+            .datum(data)
+            .attr("fill", "none")
+            .attr("stroke", "steelblue")
+            .attr("stroke-width", 1.5)
+            .attr("d", line);
+
+        lineSvg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+
+        lineSvg.append("g")
+            .call(d3.axisLeft(y));
     }
 
-    fetchVersions();
-
-    // Form submission for adding new versions
-    document.getElementById("versionForm").addEventListener("submit", function(event) {
-        event.preventDefault();
-        const version = document.getElementById("version").value;
-        const date = document.getElementById("date").value;
-        const changes = document.getElementById("changes").value;
-
-        const newVersion = { version, date, changes };
-        fetch('/api/versions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(newVersion)
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                throw new Error('Error adding version');
-            }
-        })
-        .then(() => {
-            fetchVersions(); // Refresh the chart
-            // Clear the form fields
-            document.getElementById("version").value = '';
-            document.getElementById("date").value = '';
-            document.getElementById("changes").value = '';
-        })
-        .catch(error => {
-            alert(error.message);
-        });
-    });
-});
-
+    function fetchVersions() {
+        fetch('/api/versions')
+           
