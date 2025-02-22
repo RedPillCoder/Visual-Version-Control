@@ -1,8 +1,10 @@
 from flask import Flask, render_template, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import logging
 
 app = Flask(__name__)
+logging.basicConfig(level=logging.ERROR, format='%(asctime)s %(levelname)s %(message)s')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///versions.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -49,7 +51,8 @@ def manage_versions():
         })
     
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logging.error("An error occurred: %s", str(e))
+        return jsonify({"error": "An internal error has occurred!"}), 500
 
 @app.route('/api/versions/<int:id>', methods=['DELETE'])
 def delete_version(id):
@@ -59,7 +62,8 @@ def delete_version(id):
         db.session.commit()
         return jsonify({"message": "Version deleted"}), 204
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logging.error("An error occurred: %s", str(e))
+        return jsonify({"error": "An internal error has occurred!"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
