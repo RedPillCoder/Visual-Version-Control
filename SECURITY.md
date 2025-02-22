@@ -1,8 +1,6 @@
-Creating a security policy for your GitHub project is an important step in ensuring that users know how to report vulnerabilities responsibly. Below is a template for a security policy that you can customize for your specific project.
-
 ### Security Policy for [visual_version_control]
 
-**Last Updated:** [Date]
+**Last Updated:** [22/02/2025]
 
 #### Reporting Security Vulnerabilities
 
