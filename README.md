@@ -1,2 +1,2 @@
-# visual_version_control
+# Visual-Version-Control
 A visual version control system that allows users to easily track changes to code through interactive graphs and timelines.
