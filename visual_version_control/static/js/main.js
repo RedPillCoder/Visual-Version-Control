@@ -42,13 +42,28 @@ document.addEventListener('DOMContentLoaded', function() {
             .on("mouseout", function(d) {
                 d3.select(this).attr("fill", "steelblue");
                 d3.select("#tooltip").transition().duration(500).style("opacity", 0);
+            })
+            .on("click", function(event, d) {
+                if (confirm(`Are you sure you want to delete version ${d.version}?`)) {
+                    fetch(`/api/versions/${d.id}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            fetchVersions(); // Refresh the chart
+                        } else {
+                            alert("Error deleting version.");
+                        }
+                    });
+                }
             });
     }
 
     function fetchVersions() {
         fetch('/api/versions')
             .then(response => response.json())
-            .then(data => drawChart(data));
+            .then(data => drawChart(data))
+            .catch(error => console.error('Error fetching versions:', error));
     }
 
     fetchVersions();
@@ -68,14 +83,23 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify(newVersion)
         })
-        .then(response => response.json())
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Error adding version');
+            }
+        })
         .then(() => {
             fetchVersions(); // Refresh the chart
-           
             // Clear the form fields
             document.getElementById("version").value = '';
             document.getElementById("date").value = '';
             document.getElementById("changes").value = '';
+        })
+        .catch(error => {
+            alert(error.message);
         });
     });
 });
+
