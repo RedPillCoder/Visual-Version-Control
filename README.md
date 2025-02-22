@@ -56,7 +56,3 @@ This project is a visual version control system that allows users to easily trac
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is open source and available under the [MIT License](LICENSE).
