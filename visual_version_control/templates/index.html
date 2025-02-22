@@ -34,6 +34,10 @@
         input, button {
             margin: 5px;
         }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -48,5 +52,6 @@
         <input type="text" id="changes" placeholder="Changes" required>
         <button type="submit">Add Version</button>
     </form>
+    <div id="error-message" class="error"></div>
 </body>
 </html>
