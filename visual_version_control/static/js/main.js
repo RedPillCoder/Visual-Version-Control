@@ -92,4 +92,66 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function fetchVersions() {
         fetch('/api/versions')
+            .then(response => response.json())
+            .then(data => {
+                drawBarChart(data);
+                drawLineChart(data);
+            })
+            .catch(error => console.error('Error fetching versions:', error));
+    }
+
+    // Search functionality
+    document.getElementById("searchForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        const searchTerm = document.getElementById("search").value.toLowerCase();
+        fetch('/api/versions')
+            .then(response => response.json())
+            .then(data => {
+                const filteredData = data.filter(version => 
+                    version.version.toLowerCase().includes(searchTerm) || 
+                    version.changes.toLowerCase().includes(searchTerm)
+                );
+                drawBarChart(filteredData);
+                drawLineChart(filteredData);
+            })
+            .catch(error => console.error('Error fetching versions:', error));
+    });
+
+    // Form submission for adding new versions
+    document.getElementById("versionForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        const version = document.getElementById("version").value;
+        const date = document.getElementById("date").value;
+        const changes = document.getElementById("changes").value;
+
+        const newVersion = { version, date, changes };
+        fetch('/api/versions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newVersion)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Error adding version');
+            }
+        })
+        .then(() => {
+            fetchVersions(); // Refresh the chart
+            // Clear the form fields
+            document.getElementById("version").value = '';
+            document.getElementById("date").value = '';
+            document.getElementById("changes").value = '';
+        })
+        .catch(error => {
+            alert(error.message);
+        });
+    });
+
+    // Initial fetch of versions
+    fetchVersions();
+});
            
