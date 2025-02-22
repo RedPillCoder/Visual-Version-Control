@@ -1,6 +1,6 @@
 # Visual Version Control System
 
-This project is a visual version control system that allows users to easily track changes to code through interactive graphs and timelines on GitHub. It provides a user-friendly interface for managing and visualizing version history.
+This project is a visual version control system that allows users to easily track changes to code through interactive graphs and timelines. It provides a user-friendly interface for managing and visualizing version history.
 
 ## Features
 
