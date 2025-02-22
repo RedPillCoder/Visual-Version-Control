@@ -1,6 +1,6 @@
 # Visual Version Control System
 
-This project is a visual version control system that allows users to easily track changes to code through interactive graphs and timelines. It provides a user-friendly interface for managing and visualizing version history.
+This project is a visual version control system that allows users to easily track changes to code through interactive graphs and timelines on GitHub. It provides a user-friendly interface for managing and visualizing version history.
 
 ## Features
 
@@ -11,13 +11,46 @@ This project is a visual version control system that allows users to easily trac
 - Pagination for better performance with large datasets
 - Delete versions directly from the chart
 
+
 ## Technologies Used
 
-- Backend: Flask (Python)
-- Frontend: HTML, CSS, JavaScript
-- Database: SQLite with SQLAlchemy ORM
-- Visualization: D3.js
-- Styling: Bootstrap
+1. **Backend**:
+   - Flask (Python): Web framework for the backend
+   - Flask-SQLAlchemy: ORM for database operations
+   - Flask-Login: For user authentication and session management
+   - Flask-WTF: For CSRF protection
+   - Flask-Limiter: For rate limiting API endpoints
+   - bcrypt: For password hashing
+
+2. **Frontend**:
+   - HTML5: For structuring the web pages
+   - CSS3: For styling, including custom styles
+   - JavaScript (ES6+): For client-side interactions and AJAX requests
+   - D3.js: For creating interactive data visualizations (bar chart and line chart)
+
+3. **Database**:
+   - SQLite: Lightweight, serverless database
+   - SQLAlchemy ORM: For object-relational mapping and database operations
+
+4. **Visualization**:
+   - D3.js: For creating interactive bar charts and line charts
+
+5. **Styling**:
+   - Bootstrap 4.5.2: For responsive design and pre-styled components
+
+6. **Security**:
+   - CSRF Protection: Using Flask-WTF
+   - Password Hashing: Using bcrypt
+   - Rate Limiting: Using Flask-Limiter
+
+7. **Version Control**:
+   - Git: Assumed to be used for version control
+   - GitHub: For hosting the repository and potentially for deployment
+
+8. **Development Tools**:
+   - pip: For Python package management
+   - Web Browser Developer Tools: For debugging and testing
+
 
 ## Setup and Installation
 
