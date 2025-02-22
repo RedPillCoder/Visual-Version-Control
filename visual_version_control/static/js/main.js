@@ -61,8 +61,9 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    function fetchVersions() {
-        fetch(`/api/versions?page=${currentPage}`)
+    function fetchVersions(searchTerm = '') {
+        const url = `/api/versions?page=${currentPage}&search=${encodeURIComponent(searchTerm)}`;
+        fetch(url)
             .then(response => response.json())
             .then(data => {
                 drawBarChart(data.versions);
@@ -86,6 +87,13 @@ document.addEventListener('DOMContentLoaded', function() {
             currentPage--;
             fetchVersions();
         }
+    });
+
+    // Search functionality
+    document.getElementById("searchForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        const searchTerm = document.getElementById("search").value;
+        fetchVersions(searchTerm);
     });
 
     // Form submission for adding new versions
