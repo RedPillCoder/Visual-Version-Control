@@ -33,6 +33,25 @@ with app.app_context():
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        # Check if the username already exists
+        if User.query.filter_by(username=username).first():
+            flash('Username already exists. Please choose a different one.')
+            return redirect(url_for('register'))
+        
+        new_user = User(username=username, password=password)  # In a real app, hash the password
+        db.session.add(new_user)
+        db.session.commit()
+        flash('Registration successful! You can now log in.')
+        return redirect(url_for('login'))
+    
+    return render_template('register.html')
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -105,4 +124,3 @@ def delete_version(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
-
