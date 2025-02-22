@@ -13,7 +13,6 @@ class Version(db.Model):
     date = db.Column(db.Date, nullable=False)
     changes = db.Column(db.String(200), nullable=False)
 
-# Create the database
 with app.app_context():
     db.create_all()
 
@@ -26,20 +25,21 @@ def manage_versions():
     try:
         if request.method == 'POST':
             new_version = request.json
-            version_entry = Version(version=new_version['version'], date=new_version['date'], changes=new_version['changes'])
+            date = datetime.strptime(new_version['date'], '%Y-%m-%d').date()
+            version_entry = Version(version=new_version['version'], date=date, changes=new_version['changes'])
             db.session.add(version_entry)
             db.session.commit()
             return jsonify(new_version), 201
         
         page = request.args.get('page', 1, type=int)
-        per_page = 5  # Number of versions per page
+        per_page = 5
         search_term = request.args.get('search', '', type=str)
         
         query = Version.query
         if search_term:
             query = query.filter(Version.version.ilike(f'%{search_term}%') | Version.changes.ilike(f'%{search_term}%'))
         
-        versions = query.paginate(page, per_page, error_out=False)
+        versions = query.order_by(Version.date.desc()).paginate(page, per_page, error_out=False)
         return jsonify({
             "versions": [{"id": v.id, "version": v.version, "date": v.date.strftime('%Y-%m-%d'), "changes": v.changes} for v in versions.items],
             "has_next": versions.has_next,
