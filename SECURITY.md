@@ -1,10 +1,10 @@
-### Security Policy for [visual_version_control]
+### Security Policy for [Visual-Version-Control]
 
 **Last Updated:** [22/02/2025]
 
 #### Reporting Security Vulnerabilities
 
-We take security seriously at [visual_version_control]. If you discover a security vulnerability in this repository, we encourage you to report it to us in a responsible manner. Please follow the steps below to report any security issues:
+We take security seriously at [Visual-Version-Control]. If you discover a security vulnerability in this repository, we encourage you to report it to us in a responsible manner. Please follow the steps below to report any security issues:
 
 1. **Do Not Open Issues**: Please do not open issues on GitHub to report security vulnerabilities. This helps us keep the information confidential and allows us to address the issue more effectively.
 
@@ -27,4 +27,4 @@ We take security seriously at [visual_version_control]. If you discover a securi
 - For more information on secure coding practices, please refer to [OWASP](https://owasp.org).
 - If you have any questions about this policy, feel free to reach out to us at [your-email@example.com].
 
-Thank you for helping us keep [visual_version_control] secure!
+Thank you for helping us keep [Visual-Version-Control] secure!
