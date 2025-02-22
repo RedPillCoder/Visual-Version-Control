@@ -35,11 +35,15 @@
         
         <div class="form-group">
             <h2>Add New Version</h2>
-            <form id="versionForm">
-                <input type="text" class="form-control" id="version" placeholder="Version" required>
-                <input type="date" class="form-control" id="date" required>
-                <input type="text" class="form-control" id="changes" placeholder="Changes" required>
-                <button type="submit" class="btn btn-primary">Add Version</button>
+            <form id="versionForm" class="mb-4">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="version" placeholder="Version" required>
+                    <input type="date" class="form-control" id="date" required>
+                    <input type="text" class="form-control" id="changes" placeholder="Changes" required>
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-primary">Add Version</button>
+                    </div>
+                </div>
             </form>
         </div>
 
@@ -56,6 +60,11 @@
         <h2>Version Progression</h2>
         <svg id="lineChart" width="600" height="400"></svg>
         <div id="tooltip"></div>
+
+        <div id="pagination-controls" class="mt-4">
+            <button id="prevPage" class="btn btn-secondary" disabled>Previous</button>
+            <button id="nextPage" class="btn btn-secondary">Next</button>
+        </div>
     </div>
 </body>
 </html>

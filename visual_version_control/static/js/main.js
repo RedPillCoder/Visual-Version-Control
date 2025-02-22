@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const svg = d3.select("svg");
     const width = +svg.attr("width");
     const height = +svg.attr("height");
+    let currentPage = 1;
 
     function drawBarChart(data) {
         svg.selectAll("*").remove(); // Clear previous chart
@@ -50,6 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                     .then(response => {
                         if (response.ok) {
+                            alert("Version deleted successfully!");
                             fetchVersions(); // Refresh the chart
                         } else {
                             alert("Error deleting version.");
@@ -59,62 +61,39 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    function drawLineChart(data) {
-        const lineSvg = d3.select("#lineChart");
-        lineSvg.selectAll("*").remove(); // Clear previous chart
-
-        const x = d3.scaleTime()
-            .domain(d3.extent(data, d => new Date(d.date)))
-            .range([0, width]);
-
-        const y = d3.scaleLinear()
-            .domain([0, d3.max(data, d => d.version)])
-            .range([height, 0]);
-
-        const line = d3.line()
-            .x(d => x(new Date(d.date)))
-            .y((d, i) => y(i + 1));
-
-        lineSvg.append("path")
-            .datum(data)
-            .attr("fill", "none")
-            .attr("stroke", "steelblue")
-            .attr("stroke-width", 1.5)
-            .attr("d", line);
-
-        lineSvg.append("g")
-            .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(x));
-
-        lineSvg.append("g")
-            .call(d3.axisLeft(y));
-    }
-
-    function fetchVersions() {
-        fetch('/api/versions')
+    function fetchVersions(searchTerm = '') {
+        const url = `/api/versions?page=${currentPage}&search=${encodeURIComponent(searchTerm)}`;
+        fetch(url)
             .then(response => response.json())
             .then(data => {
-                drawBarChart(data);
-                drawLineChart(data);
+                drawBarChart(data.versions);
+                updatePaginationControls(data);
             })
             .catch(error => console.error('Error fetching versions:', error));
     }
+
+    function updatePaginationControls(data) {
+        document.getElementById("prevPage").disabled = !data.has_prev;
+        document.getElementById("nextPage").disabled = !data.has_next;
+    }
+
+    document.getElementById("nextPage").addEventListener("click", function() {
+        currentPage++;
+        fetchVersions();
+    });
+
+    document.getElementById("prevPage").addEventListener("click", function() {
+        if (currentPage > 1) {
+            currentPage--;
+            fetchVersions();
+        }
+    });
 
     // Search functionality
     document.getElementById("searchForm").addEventListener("submit", function(event) {
         event.preventDefault();
-        const searchTerm = document.getElementById("search").value.toLowerCase();
-        fetch('/api/versions')
-            .then(response => response.json())
-            .then(data => {
-                const filteredData = data.filter(version => 
-                    version.version.toLowerCase().includes(searchTerm) || 
-                    version.changes.toLowerCase().includes(searchTerm)
-                );
-                drawBarChart(filteredData);
-                drawLineChart(filteredData);
-            })
-            .catch(error => console.error('Error fetching versions:', error));
+        const searchTerm = document.getElementById("search").value;
+        fetchVersions(searchTerm);
     });
 
     // Form submission for adding new versions
@@ -124,34 +103,41 @@ document.addEventListener('DOMContentLoaded', function() {
         const date = document.getElementById("date").value;
         const changes = document.getElementById("changes").value;
 
-        const newVersion = { version, date, changes };
-        fetch('/api/versions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(newVersion)
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                throw new Error('Error adding version');
-            }
-        })
-        .then(() => {
-            fetchVersions(); // Refresh the chart
-            // Clear the form fields
-            document.getElementById("version").value = '';
-            document.getElementById("date").value = '';
-            document.getElementById("changes").value = '';
-        })
-        .catch(error => {
-            alert(error.message);
-        });
+        // Check if version already exists
+        fetch('/api/versions')
+            .then(response => response.json())
+            .then(data => {
+                const exists = data.versions.some(v => v.version === version);
+                if (exists) {
+                    alert("Version already exists. Please choose a different version name.");
+                    return;
+                }
+                const newVersion = { version, date, changes };
+                fetch('/api/versions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newVersion)
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert("Version added successfully!");
+                        fetchVersions(); // Refresh the chart
+                        // Clear the form fields
+                        document.getElementById("version").value = '';
+                        document.getElementById("date").value = '';
+                        document.getElementById("changes").value = '';
+                    } else {
+                        throw new Error('Error adding version');
+                    }
+                })
+                .catch(error => {
+                    alert("Error adding version: " + error.message);
+                });
+            });
     });
 
     // Initial fetch of versions
     fetchVersions();
 });
-           
