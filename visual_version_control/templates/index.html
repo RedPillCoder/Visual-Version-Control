@@ -11,36 +11,58 @@
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </head>
 <body>
-    <div class="container">
-        <h1 class="text-center">Visual Version Control System</h1>
-        <a href="/logout" class="btn btn-danger">Logout</a>
-        
-        <div class="form-group">
-            <h2>Add New Version</h2>
-            <form id="versionForm" class="mb-4">
-                <div class="input-group">
-                    <input type="text" class="form-control" id="version" placeholder="Version" required>
-                    <input type="date" class="form-control" id="date" required>
-                    <input type="text" class="form-control" id="changes" placeholder="Changes" required>
-                    <div class="input-group-append">
-                        <button type="submit" class="btn btn-primary">Add Version</button>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Visual Version Control</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+            </ul>
+            <a href="/logout" class="btn btn-danger my-2 my-sm-0">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2>Add New Version</h2>
+            </div>
+            <div class="card-body">
+                <form id="versionForm" class="mb-4">
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <input type="text" class="form-control" id="version" placeholder="Version" required>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <input type="date" class="form-control" id="date" required>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <input type="text" class="form-control" id="changes" placeholder="Changes" required>
+                        </div>
                     </div>
-                </div>
-            </form>
+                    <button type="submit" class="btn btn-primary">Add Version</button>
+                </form>
+            </div>
         </div>
 
-        <div class="form-group">
-            <h2>Search Versions</h2>
-            <form id="searchForm">
-                <input type="text" class="form-control" id="search" placeholder="Search by version or changes">
-                <button type="submit" class="btn btn-secondary mt-2">Search</button>
-            </form>
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2>Search Versions</h2>
+            </div>
+            <div class="card-body">
+                <form id="searchForm">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="search" placeholder="Search by version or changes">
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-secondary">Search</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <h2>Version History</h2>
-        <svg width="600" height="400"></svg>
+        <svg width="600" height="400" class="mb-4"></svg>
         <h2>Version Progression</h2>
-        <svg id="lineChart" width="600" height="400"></svg>
+        <svg id="lineChart" width="600" height="400" class="mb-4"></svg>
         <div id="tooltip"></div>
 
         <div id="pagination-controls" class="mt-4">
@@ -48,5 +70,9 @@
             <button id="nextPage" class="btn btn-secondary">Next</button>
         </div>
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
