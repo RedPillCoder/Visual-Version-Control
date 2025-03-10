@@ -1,6 +1,9 @@
 from flask import Flask, render_template, jsonify, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import DataRequired
 from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -43,6 +46,16 @@ with app.app_context():
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+class RegistrationForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Register')
+
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Login')
+
 @app.route('/')
 def home():
     return redirect(url_for('register'))
@@ -50,9 +63,10 @@ def home():
 @app.route('/register', methods=['GET', 'POST'])
 @limiter.limit("5 per minute")
 def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+    form = RegistrationForm()  # Create an instance of your form
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
         
         if User.query.filter_by(username=username).first():
             flash('Username already exists. Please choose a different one.')
@@ -65,21 +79,22 @@ def register():
         flash('Registration successful! You can now log in.')
         return redirect(url_for('login'))
     
-    return render_template('register.html')
+    return render_template('register.html', form=form)  # Pass the form to the template
 
 @app.route('/login', methods=['GET', 'POST'])
 @limiter.limit("5 per minute")
 def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+    form = LoginForm()  # Create an instance of your login form
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
         user = User.query.filter_by(username=username).first()
         if user and bcrypt.checkpw(password.encode('utf-8'), user.password):
             login_user(user)
             return redirect(url_for('index'))
         else:
             flash('Invalid username or password')
-    return render_template('login.html')
+    return render_template('login.html', form=form)  # Pass the form to the template
 
 @app.route('/logout')
 @login_required
