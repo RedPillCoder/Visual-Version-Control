@@ -6,3 +6,4 @@ SQLAlchemy==1.4.47
 bcrypt==3.2.0
 Flask-WTF==0.15.1
 Flask-Limiter==1.4
+setuptools
